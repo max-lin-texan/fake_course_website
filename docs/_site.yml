@@ -1,0 +1,18 @@
+name: "CSCI5451"
+output_dir: "."
+navbar:
+  title: "CSCI 5451"
+  left:
+    - text: "首頁"
+      href: index.html
+    - text: "Schedule"
+      href: schedule.html
+    - text: "Projects"
+      href: project.html
+output:
+  html_document:
+    theme: cosmo
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    self_contained: true

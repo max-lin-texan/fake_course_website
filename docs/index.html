@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>CSCI 5451, Introduction to Parallel Programming</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">CSCI 5451</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">首頁</a>
+</li>
+<li>
+  <a href="schedule.html">Schedule</a>
+</li>
+<li>
+  <a href="project.html">Projects</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">CSCI 5451, Introduction to Parallel
+Programming</h1>
+<h3 class="subtitle">Fall 2025 · Mon &amp; Wed 8:15–9:30 · Lind Hall
+302</h3>
+
+</div>
+
+
+<!-- 內嵌一點 CSS，免外部檔 -->
+<style>
+body { line-height: 1.6; max-width: 980px; margin: auto; }
+hr { margin: 2rem 0; }
+.nav-inline a { margin-right: 1rem; font-weight: 600; }
+table { width: 100%; }
+th, td { vertical-align: top; }
+small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+</style>
+<div class="nav-inline">
+<p><a href="#course-information">課程資訊</a>
+<a href="#schedule">Schedule</a>
+<a href="#grading-evaluation--late-policy">評分與遲交</a>
+<a href="#homework-assignments">作業</a>
+<a href="#project-details">專題</a> <a href="#prerequisites">先修</a>
+<a href="#textbook--related-classes--online-resources">資源</a></p>
+</div>
+<hr />
+<ul>
+<li><a href="#course-information">課程資訊</a><br />
+</li>
+<li><a href="#schedule">Schedule</a><br />
+</li>
+<li><a href="#grading-evaluation--late-policy">評分與遲交</a><br />
+</li>
+<li><a href="#homework-assignments">作業</a><br />
+</li>
+<li><a href="#project-details">專題</a><br />
+</li>
+<li><a href="#prerequisites">先修</a><br />
+</li>
+<li><a href="#textbook--related-classes--online-resources">資源</a></li>
+</ul>
+<div id="course-information" class="section level2">
+<h2>課程資訊</h2>
+<p>本課介紹平行計算：平行架構、平行演算法與其效率分析。實作以
+<strong>C</strong> 為主，亦涵蓋 <strong>OpenMP、MPI、CUDA（選配
+NCCL）</strong>。<br />
+課程將由理論（平行複雜度、效率）逐步轉向實務（排序、圖論、矩陣演算法等在
+CUDA 架構上的應用）。</p>
+<ul>
+<li><strong>授課教師</strong>：James Mooney<br />
+</li>
+<li><strong>助教</strong>：Wenjie Zhang</li>
+</ul>
+<p><strong>上課時間地點</strong>：Mon &amp; Wed 8:15–9:30，Lind Hall
+302<br />
+<strong>Office hours</strong>：<br />
+  James：Tue 3:30–4:30，Shepherd 439<br />
+  Wenjie：Thu 4:00–5:00，Keller Hall 6-210</p>
+<p><strong>Class page</strong>：<a
+href="https://jimtmooney.github.io/Courses/F25/index.html"
+class="uri">https://jimtmooney.github.io/Courses/F25/index.html</a><br />
+<strong>Canvas</strong>：<a href="https://canvas.umn.edu/"
+class="uri">https://canvas.umn.edu/</a></p>
+</div>
+<div id="grading-evaluation--late-policy" class="section level2">
+<h2>評分與遲交政策</h2>
+<div id="評分" class="section level3">
+<h3>評分</h3>
+<ul>
+<li><strong>作業 75%</strong> —— 共 5 次（每次 15%）<br />
+</li>
+<li><strong>期末專題 25%</strong> —— 3–4 人一組</li>
+</ul>
+</div>
+<div id="評量方式" class="section level3">
+<h3>評量方式</h3>
+<p>自動批改與人工批改並行；詳見各作業頁。</p>
+</div>
+<div id="遲交" class="section level3">
+<h3>遲交</h3>
+<p>每 <strong>逾時 3 小時</strong> 扣
+<strong>2.5%</strong>（例如整天約扣 20%）。 &gt; 扣分計算：<span
+class="mono">ceiling(hours_late / 3) * 2.5</span>。</p>
+<p>專題逾期原則上不收，除非事前核可之特殊狀況。</p>
+</div>
+</div>
+<div id="schedule" class="section level2">
+<h2>Schedule</h2>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>日期</th>
+<th>講次與公告</th>
+<th>閱讀</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sep 3</td>
+<td>課程導覽</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Sep 8</td>
+<td>平行架構（上）</td>
+<td>Grama, Ch. 2.1–2.3</td>
+</tr>
+<tr class="odd">
+<td>Sep 10</td>
+<td>平行架構（下）</td>
+<td>Grama, Ch. 2.4</td>
+</tr>
+<tr class="even">
+<td>Sep 15</td>
+<td>平行演算法設計；<strong>[補充]
+伺服器測試說明</strong>；<strong>[補充] 測試程式</strong></td>
+<td>Grama, Ch. 3.1–3.3</td>
+</tr>
+<tr class="odd">
+<td>Sep 17</td>
+<td>任務到處理器的對應</td>
+<td>Grama, Ch. 2.5–2.7, 3.4–3.5</td>
+</tr>
+<tr class="even">
+<td>Sep 22</td>
+<td>對應（續）；Threading</td>
+<td>Grama, Ch. 2.7, 3.5, 7.1–7.2</td>
+</tr>
+<tr class="odd">
+<td>Sep 24</td>
+<td>Threads → OpenMP</td>
+<td>Grama, Ch. 7.1–7.5, 7.10.1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>需要更多週數？直接複製上表新增列即可。若你想讓表格可排序/分頁，可把
+YAML 的 <code>df_print</code> 留為 <code>paged</code>，或改用
+<code>knitr::kable()</code>。</p>
+</blockquote>
+</div>
+<div id="homework-assignments" class="section level2">
+<h2>作業</h2>
+<ul>
+<li><strong>HW1</strong> —— <em>待公告</em><br />
+</li>
+<li><strong>HW2</strong> —— <em>待公告</em><br />
+</li>
+<li><strong>HW3</strong> —— <em>待公告</em><br />
+</li>
+<li><strong>HW4</strong> —— <em>待公告</em><br />
+</li>
+<li><strong>HW5</strong> —— <em>待公告</em></li>
+</ul>
+</div>
+<div id="project-details" class="section level2">
+<h2>專題說明</h2>
+<p>3–4
+人一組，從真實程式出發進行平行化與效能評估。題目、分工與里程碑會在學期中公布。</p>
+</div>
+<div id="prerequisites" class="section level2">
+<h2>先修課程</h2>
+<p>熟悉 <strong>C</strong> 語法／除錯與演算法；課程不再重教 C
+語言基礎。</p>
+</div>
+<div id="textbook--related-classes--online-resources"
+class="section level2">
+<h2>教材與資源</h2>
+<div id="書籍" class="section level3">
+<h3>書籍</h3>
+<ul>
+<li><em>Introduction to Parallel Computing, 2nd Ed.</em> —— Kumar,
+Grama, Gupta, Karypis (2003)<br />
+</li>
+<li><em>Programming Massively Parallel Processors, 4th Ed.</em> —— Kirk,
+Hwu (2022)</li>
+</ul>
+<hr />
+<p><small>© 2025 University of Minnesota</small></p>
+<!-- Back to Top 按鈕 -->
+<button onclick="topFunction()" id="backToTop" title="回到頂端">
+↑ Top
+</button>
+<style>
+#backToTop {
+  display: none; /* 預設隱藏 */
+  position: fixed;
+  bottom: 20px;   /* 與下邊界距離 */
+  right: 20px;    /* 與右邊界距離 */
+  z-index: 9999;  /* 確保在最上層 */
+  border: none;
+  outline: none;
+  background-color: #007BFF;
+  color: white;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+#backToTop:hover {
+  background-color: #0056b3;
+}
+</style>
+<script>
+// 當使用者捲動超過 80px，就顯示按鈕
+window.onscroll = function() {
+  let btn = document.getElementById("backToTop");
+  if (document.body.scrollTop > 80 || document.documentElement.scrollTop > 80) {
+    btn.style.display = "block";
+  } else {
+    btn.style.display = "none";
+  }
+};
+
+// 點擊按鈕回到頂端（平滑捲動）
+function topFunction() {
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
